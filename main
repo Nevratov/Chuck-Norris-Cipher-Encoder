@@ -1,0 +1,121 @@
+import kotlin.system.exitProcess
+
+fun main() {
+    println("Please input operation (encode/decode/exit):")
+    when (val input = readln()) {
+        "encode" -> encode()
+        "decode" -> decode()
+        "exit" -> {
+            println("Bye")
+            exitProcess(0)
+        } else -> {
+        println("There is no '$input' operation")
+        println()
+        main()
+    }
+    }
+}
+
+var nul = 0
+var one = 0
+var lastCh = 999
+
+fun encode() {
+    println("Input string:")
+    val input = readln()
+
+    println("Encoded string:")
+
+    for (ch in input) {
+        val binaryString = (String.format("%07d", (Integer.toBinaryString(ch.code)).toInt()))
+        for (binaryCh in binaryString) {
+            if (binaryCh == '0') {
+                nul++
+                if (lastCh == 1) printOne(one)
+                lastCh = 0
+
+            } else {
+                one++
+                if (lastCh == 0) printNul(nul)
+                lastCh = 1
+            }
+        }
+    }
+
+    if (nul != 0) printNul(nul)
+    if (one != 0) printOne(one)
+
+    println("\n")
+    main()
+}
+
+fun printNul(n: Int) {
+    print("00 ")
+    repeat(n) { print('0') }
+    print(" ")
+    nul = 0
+}
+fun printOne(n: Int) {
+    print("0 ")
+    repeat(n) { print('0') }
+    print(" ")
+    one = 0
+}
+
+fun decode() {
+    println("Input encoded string:")
+    val input = readln().trim()
+    val listInput: MutableList<String> = input.split(' ') as MutableList<String>
+//    if (listInput[0] == "") listInput.remove("")
+//    if (listInput.last() == "") listInput.remove("")
+
+    var bitesString = ""
+    try {
+
+        for (i in listInput.indices step 2) {
+            if (listInput[i] == "0") {
+                repeat(listInput[i + 1].length) {
+                    bitesString += "1"
+                }
+            } else if (listInput[i] == "00") {
+                repeat(listInput[i + 1].length) {
+                    bitesString += "0"
+                }
+            } else {
+                println("Encoded string is not valid.")
+                println()
+                main()
+                return
+            }
+        }
+    } catch (e:IndexOutOfBoundsException) {
+        println("Encoded string is not valid.")
+        println()
+        main()
+        return
+    }
+
+    if (bitesString.length % 7 == 0) {
+        var result = byteArrayOf()
+        var countCh = bitesString.length / 7
+        var fCh = 0
+        var lCh = 7
+        while (countCh != 0) {
+            val pp = bitesString.substring(fCh, lCh)
+            result += pp.toByte(2)
+            countCh--
+            fCh += 7
+            lCh += 7
+        }
+        println("Decoded string:")
+        println(result.toString(Charsets.UTF_8))
+        println()
+
+        main()
+    } else {
+        println("Encoded string is not valid.")
+        println()
+        main()
+        return
+    }
+}
